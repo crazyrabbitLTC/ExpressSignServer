@@ -48,12 +48,15 @@ app.get("/", function(req, res, next) {
 });
 
 app.post("/", (req, res) => {
-  console.log(req.body);
-  console.log("Type of: ", typeof req.body);
+  //console.log(req.body);
+  //console.log("Type of: ", typeof req.body);
   return res.json(req.body);
 });
 
+//Expose the JSON Body:
 app.post("/checkSig", (req, res, next) => {
+  const obj = req.body;
+  // Decided if we want to sign the transaction or not. 
   signMessage(req, res);
 })
 
@@ -70,9 +73,7 @@ const signMessage = async (req, res) => {
     !obj.hasOwnProperty(obj.nonce)
   ) {
     const {relay, from, encodedFunction, transactionFee, gasPrice, gasLimit, nonce }  = obj;
-    console.log("The object: ", obj);
     const signedMessage = await _signContractCall(relay, from, encodedFunction, transactionFee, gasPrice, gasLimit, nonce, RELAY_HUB, RECIPIENT_ADDRESS, trustedPrivKey)
-    console.log("Signed message: ", signedMessage);
     return res.json({signedMessage: signedMessage});
   } else {
     //Send this error message if our POST object  is not properly formatted
