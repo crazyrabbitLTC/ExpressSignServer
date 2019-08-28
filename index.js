@@ -1,3 +1,5 @@
+require("dotenv").config();
+const port = process.env.PORT || 88;
 const express = require("express");
 const cors = require("cors");
 const app = express();
@@ -20,6 +22,6 @@ app.get("/", function(req, res, next) {
   res.json({ msg: "This is CORS-enabled for all origins!" });
 });
 
-app.listen(80, function() {
+app.listen(port, function() {
   console.log("CORS-enabled web server listening on port 80");
 });
