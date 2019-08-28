@@ -25,9 +25,16 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.use(express.json())
 
 app.get("/", function(req, res, next) {
   res.json({ msg: "This is CORS-enabled for all origins!" });
+});
+
+app.post('/', (req, res) => {
+  console.log(req.body);
+  console.log("Type of: ", typeof(req.body));
+  return res.json(req.body)
 });
 
 app.listen(port, function() {
