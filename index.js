@@ -1,8 +1,16 @@
 require("dotenv").config();
 const port = process.env.PORT || 88;
 const express = require("express");
+const EthCrypto = require("eth-crypto");
 const cors = require("cors");
 const app = express();
+
+
+const generatedKeyPair = EthCrypto.createIdentity();
+const trustedSigner =
+  process.env.TRUSTED_SIGNER ||
+  EthCrypto.publicKey.toAddress(generatedKeyPair.publicKey);
+console.log("Trusted Signer is: ", trustedSigner);
 
 const whitelist = ["http://localhost"];
 const corsOptions = {
