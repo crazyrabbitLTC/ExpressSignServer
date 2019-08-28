@@ -1,0 +1,25 @@
+{
+  "name": "expresssignserver",
+  "version": "1.0.0",
+  "description": "Simple Express Server to Sign Messages to be verified on-chain in Solidity Contracts",
+  "main": "/src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/crazyrabbitLTC/ExpressSignServer.git"
+  },
+  "author": "Dennison Bertram (dennison@openzeppelin.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/crazyrabbitLTC/ExpressSignServer/issues"
+  },
+  "homepage": "https://github.com/crazyrabbitLTC/ExpressSignServer#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^8.1.0",
+    "express": "^4.17.1",
+    "nodemon": "^1.19.1"
+  }
+}
