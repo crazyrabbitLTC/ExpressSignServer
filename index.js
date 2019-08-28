@@ -5,16 +5,19 @@ const EthCrypto = require("eth-crypto");
 const cors = require("cors");
 const app = express();
 
+//Not clearly needed.
 const generatedKeyPair = EthCrypto.createIdentity();
-const trustedSigner =
-  process.env.TRUSTED_SIGNER ||
-  EthCrypto.publicKey.toAddress(generatedKeyPair.publicKey);
+
+const trustedPrivKey =
+  process.env.TRUSTED_SIGNER_PRIVKEY || generatedKeyPair.privateKey;
+const trustedPubKey = EthCrypto.publicKeyByPrivateKey(trustedPrivKey);
 
 const RELAY_HUB =
   process.env.RELAY_HUB || "0xd216153c06e857cd7f72665e0af1d7d82172f494";
+
 const RECIPIENT_ADDRESS = process.env.RECIPIENT_ADDRESS || null;
 
-//Check to be sure we have our contrat addresses. Kill server if not provided.
+//Check to be sure we have our contract addresses. Kill server if not provided.
 if (!RECIPIENT_ADDRESS) {
   process.on("exit", function(code) {
     return console.log(
@@ -49,6 +52,31 @@ app.post("/", (req, res) => {
   return res.json(req.body);
 });
 
+app.post("/checkSig", (req, res, next) => {
+  signMessage(req, res);
+})
+
+const signMessage = async (req, res) => {
+  const obj = req.body;
+  //Require that all our properties are present or else send an error
+  if (
+    !obj.hasOwnProperty(obj.relay) &&
+    !obj.hasOwnProperty(obj.from) &&
+    !obj.hasOwnProperty(obj.encodedFunction) &&
+    !obj.hasOwnProperty(obj.transactionFee) &&
+    !obj.hasOwnProperty(obj.gasPRice) &&
+    !obj.hasOwnProperty(obj.gasLimit) &&
+    !obj.hasOwnProperty(obj.nonce)
+  ) {
+    const {relay, from, encodedFunction, transactionFee, gasPrice, gasLimit, nonce }  = obj;
+    const signedMessage = await _signContractCall(relay, from, encodedFunction, transactionFee, gasPrice, gasLimit, nonce, RELAY_HUB, RECIPIENT_ADDRESS, trustedPrivKey)
+    console.log("Signed message: ", signedMessage);
+    return res.json({signedMessage: signedMessage});
+  } else {
+    //Send this error message if our POST object  is not properly formatted
+    res.status(500).send("Incorrect JSON object");
+  }
+};
 
 const _signContractCall = async (
   relay,
@@ -62,7 +90,7 @@ const _signContractCall = async (
   RELAY_RECIPIENT,
   privateKey
 ) => {
-  const message = EthCrypto.hash.keccak256([
+  const message = EthCrypto.hash.keccak256("0x",[
     { type: "address", value: relay },
     { type: "address", value: from },
     { type: "bytes", value: encodedFunction },
@@ -73,17 +101,9 @@ const _signContractCall = async (
     { type: "address", value: RELAY_HUB },
     { type: "address", value: RELAY_RECIPIENT }
   ]);
-  const signature = await EthCrypto.sign(privateKey, message);
-};
+  const signedMessage = await EthCrypto.sign(privateKey, message);
 
-const signWord = async word => {
-  try {
-    const message = EthCrypto.hash.keccak256([{ type: "string", value: word }]);
-    const signature = await EthCrypto.sign(privateKey, message);
-    return signature;
-  } catch (error) {
-    console.log(error);
-  }
+  return signedMessage;
 };
 
 app.listen(port, function() {
