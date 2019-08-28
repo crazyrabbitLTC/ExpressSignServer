@@ -10,7 +10,18 @@ const generatedKeyPair = EthCrypto.createIdentity();
 const trustedSigner =
   process.env.TRUSTED_SIGNER ||
   EthCrypto.publicKey.toAddress(generatedKeyPair.publicKey);
-console.log("Trusted Signer is: ", trustedSigner);
+
+const RELAY_HUB = process.env.RELAY_HUB || "0xd216153c06e857cd7f72665e0af1d7d82172f494";
+const RECIPIENT_ADDRESS =  process.env.RECIPIENT_ADDRESS || null;
+
+//Check to be sure we have our contrat addresses. Kill server if not provided.
+if(!RECIPIENT_ADDRESS){
+  process.on('exit', function(code) {
+    return console.log('ERROR: Contract Addresses are required to run signing server. Please edit the .env')
+});
+  process.exit(22);
+}
+
 
 const whitelist = ["http://localhost"];
 const corsOptions = {
@@ -37,6 +48,16 @@ app.post('/', (req, res) => {
   return res.json(req.body)
 });
 
+//DATA  Required to  Sign
+// address relay,
+// address from,
+// bytes calldata encodedFunction,
+// uint256 transactionFee,
+// uint256 gasPrice,
+// uint256 gasLimit,
+// uint256 nonce,
+// Address  RelayHub
+// Address Recipient contract
 app.listen(port, function() {
   console.log("CORS-enabled web server listening on port 80");
 });
