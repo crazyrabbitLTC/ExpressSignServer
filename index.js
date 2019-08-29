@@ -64,18 +64,50 @@ app.use(express.json());
 //   next();
 // });
 
-app.get("/", (req, res) => {
-  return res.send("Received a GET HTTP method");
-});
-app.post("/", (req, res) => {
-  return res.send("Received a POST HTTP method");
-});
+// app.get("/", (req, res) => {
+//   return res.send("Received a GET HTTP method");
+// });
+// app.post("/", (req, res) => {
+//   return res.send("Received a POST HTTP method");
+// });
 
 //Signup Area
 app.put("/", (req, res) => {
   const obj = req.body;
-  //Require the following fields: username, email, encryptedPrivateKey, publicKey
-  return res.send("Received a PUT HTTP method");
+  //Require the following fields: username, email, encryptedPrivKey, pubKey.
+  //Potentially ask user to sign something like the Username + Email so we know their private key
+  //Matches their public key.
+  if (
+    !obj.hasOwnProperty(obj.userName) &&
+    !obj.hasOwnProperty(obj.email) &&
+    !obj.hasOwnProperty(obj.encryptedPrivKey) &&
+    !obj.hasOwnProperty(obj.pubKey)
+  ) {
+
+    //Check if User Exists:
+    if (db[obj.pubKey]) {
+      return res.status(500).send("User already exists");
+    } else {
+
+      //Create the User on our MockDatabase
+      db[obj.pubKey] = {
+        userName: obj.userName,
+        email: obj.email,
+        encryptedPrivKey: obj.encryptedPrivKey,
+        nonce: 0
+      };
+      console.log("Created User: ", db[obj.pubKey])
+      //Return okay Status. 
+      return res
+        .status(201)
+        .send(`User ${obj.userName} with publicKey: ${obj.pubKey} created.`);
+    }
+  } else {
+    //Send this error message if our POST object is not properly formatted
+    return res
+      .status(500)
+      .send("Incorrect JSON object: User Signup has wrong arguments");
+  }
 });
 
 app.delete("/", (req, res) => {
