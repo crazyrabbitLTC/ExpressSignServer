@@ -4,6 +4,7 @@ const express = require("express");
 const EthCrypto = require("eth-crypto");
 const cors = require("cors");
 const app = express();
+const { signMessage } = require("./utils/signUtils.js");
 
 //This is our Mock Database
 //Each user should have this format, we index by publicKey and always require messages to be signed with a nonce  top revent reuse
@@ -54,11 +55,38 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-app.get("/", function(req, res, next) {
+//On each interaction with the server, the user will be required on the front end to sign a message with
+//their private key with the  most recent nonce. We recover the signer in Javascript and identify theu sers
+
+//Here we will find
+// app.use((req, res, next) => {
+//   req.me = users[1];
+//   next();
+// });
+
+app.get("/", (req, res) => {
+  return res.send("Received a GET HTTP method");
+});
+app.post("/", (req, res) => {
+  return res.send("Received a POST HTTP method");
+});
+
+//Signup Area
+app.put("/", (req, res) => {
+  const obj = req.body;
+  //Require the following fields: username, email, encryptedPrivateKey, publicKey
+  return res.send("Received a PUT HTTP method");
+});
+
+app.delete("/", (req, res) => {
+  return res.send("Received a DELETE HTTP method");
+});
+
+app.get("/test", function(req, res, next) {
   res.json({ msg: "This is CORS-enabled for all origins!" });
 });
 
-app.post("/", (req, res) => {
+app.post("//test", (req, res) => {
   //console.log(req.body);
   //console.log("Type of: ", typeof req.body);
   return res.json(req.body);
@@ -68,77 +96,8 @@ app.post("/", (req, res) => {
 app.post("/checkSig", (req, res, next) => {
   const obj = req.body;
   // Decided if we want to sign the transaction or not.
-  signMessage(req, res);
+  signMessage(req, res, RELAY_HUB, RECIPIENT_ADDRESS, trustedPrivKey);
 });
-
-const signMessage = async (req, res) => {
-  const obj = req.body;
-  //Require that all our properties are present or else send an error
-  if (
-    !obj.hasOwnProperty(obj.relay) &&
-    !obj.hasOwnProperty(obj.from) &&
-    !obj.hasOwnProperty(obj.encodedFunction) &&
-    !obj.hasOwnProperty(obj.transactionFee) &&
-    !obj.hasOwnProperty(obj.gasPRice) &&
-    !obj.hasOwnProperty(obj.gasLimit) &&
-    !obj.hasOwnProperty(obj.nonce)
-  ) {
-    const {
-      relay,
-      from,
-      encodedFunction,
-      transactionFee,
-      gasPrice,
-      gasLimit,
-      nonce
-    } = obj;
-    const signedMessage = await _signContractCall(
-      relay,
-      from,
-      encodedFunction,
-      transactionFee,
-      gasPrice,
-      gasLimit,
-      nonce,
-      RELAY_HUB,
-      RECIPIENT_ADDRESS,
-      trustedPrivKey
-    );
-    return res.json({ signedMessage: signedMessage });
-  } else {
-    //Send this error message if our POST object  is not properly formatted
-    res.status(500).send("Incorrect JSON object");
-  }
-};
-
-const _signContractCall = async (
-  relay,
-  from,
-  encodedFunction,
-  transactionFee,
-  gasPrice,
-  gasLimit,
-  nonce,
-  RELAY_HUB,
-  RELAY_RECIPIENT,
-  privateKey
-) => {
-  const message = EthCrypto.hash.keccak256([
-    { type: "address", value: relay },
-    { type: "address", value: from },
-    { type: "bytes", value: encodedFunction },
-    { type: "uint256", value: transactionFee },
-    { type: "uint256", value: gasPrice },
-    { type: "uint256", value: gasLimit },
-    { type: "uint256", value: nonce },
-    { type: "address", value: RELAY_HUB },
-    { type: "address", value: RELAY_RECIPIENT }
-  ]);
-  console.log("The message once hashed is: ", message);
-  const signedMessage = await EthCrypto.sign(privateKey, message);
-
-  return signedMessage;
-};
 
 app.listen(port, function() {
   console.log("CORS-enabled web server listening on port 80");
