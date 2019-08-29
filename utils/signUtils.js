@@ -40,6 +40,46 @@ const signMessage = async (req, res, RELAY_HUB, RECIPIENT_ADDRESS, trustedPrivKe
   }
 };
 
+const createUser = (req,res, db) => {
+    
+  //Require the following fields: username, email, encryptedPrivKey, pubKey.
+  //Potentially ask user to sign something like the Username + Email so we know their private key
+  //Matches their public key.
+  const obj = req.body;
+
+  if (
+    !obj.hasOwnProperty(obj.userName) &&
+    !obj.hasOwnProperty(obj.email) &&
+    !obj.hasOwnProperty(obj.encryptedPrivKey) &&
+    !obj.hasOwnProperty(obj.pubKey)
+  ) {
+
+    //Check if User Exists:
+    if (db[obj.pubKey]) {
+      return res.status(500).send("User already exists");
+    } else {
+
+      //Create the User on our MockDatabase
+      db[obj.pubKey] = {
+        userName: obj.userName,
+        email: obj.email,
+        encryptedPrivKey: obj.encryptedPrivKey,
+        nonce: 0
+      };
+
+      //Return okay Status. 
+      return res
+        .status(201)
+        .send(`User ${obj.userName} with publicKey: ${obj.pubKey} created.`);
+    }
+  } else {
+    //Send this error message if our POST object is not properly formatted
+    return res
+      .status(500)
+      .send("Incorrect JSON object: User Signup has wrong arguments");
+  }
+}
+
 const _signContractCall = async (
   relay,
   from,
@@ -69,4 +109,5 @@ const _signContractCall = async (
   return signedMessage;
 };
 
-module.exports = { signMessage };
+
+module.exports = { signMessage, createUser };

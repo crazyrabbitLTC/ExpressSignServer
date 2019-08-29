@@ -4,7 +4,7 @@ const express = require("express");
 const EthCrypto = require("eth-crypto");
 const cors = require("cors");
 const app = express();
-const { signMessage } = require("./utils/signUtils.js");
+const { signMessage, createUser } = require("./utils/signUtils.js");
 
 //This is our Mock Database
 //Each user should have this format, we index by publicKey and always require messages to be signed with a nonce  top revent reuse
@@ -74,40 +74,7 @@ app.use(express.json());
 //Signup Area
 app.put("/", (req, res) => {
   const obj = req.body;
-  //Require the following fields: username, email, encryptedPrivKey, pubKey.
-  //Potentially ask user to sign something like the Username + Email so we know their private key
-  //Matches their public key.
-  if (
-    !obj.hasOwnProperty(obj.userName) &&
-    !obj.hasOwnProperty(obj.email) &&
-    !obj.hasOwnProperty(obj.encryptedPrivKey) &&
-    !obj.hasOwnProperty(obj.pubKey)
-  ) {
-
-    //Check if User Exists:
-    if (db[obj.pubKey]) {
-      return res.status(500).send("User already exists");
-    } else {
-
-      //Create the User on our MockDatabase
-      db[obj.pubKey] = {
-        userName: obj.userName,
-        email: obj.email,
-        encryptedPrivKey: obj.encryptedPrivKey,
-        nonce: 0
-      };
-      console.log("Created User: ", db[obj.pubKey])
-      //Return okay Status. 
-      return res
-        .status(201)
-        .send(`User ${obj.userName} with publicKey: ${obj.pubKey} created.`);
-    }
-  } else {
-    //Send this error message if our POST object is not properly formatted
-    return res
-      .status(500)
-      .send("Incorrect JSON object: User Signup has wrong arguments");
-  }
+  createUser(req, res, db);
 });
 
 app.delete("/", (req, res) => {
