@@ -4,7 +4,7 @@ const express = require("express");
 const EthCrypto = require("eth-crypto");
 const cors = require("cors");
 const app = express();
-const { signMessage, createUser } = require("./utils/signUtils.js");
+const { signMessage, createUser, recoverSignerAddress } = require("./utils/signUtils.js");
 
 //This is our Mock Database
 //Each user should have this format, we index by publicKey and always require messages to be signed with a nonce  top revent reuse

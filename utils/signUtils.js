@@ -1,6 +1,12 @@
 const EthCrypto = require("eth-crypto");
 
-const signMessage = async (req, res, RELAY_HUB, RECIPIENT_ADDRESS, trustedPrivKey) => {
+const signMessage = async (
+  req,
+  res,
+  RELAY_HUB,
+  RECIPIENT_ADDRESS,
+  trustedPrivKey
+) => {
   const obj = req.body;
   //Require that all our properties are present or else send an error
   if (
@@ -40,8 +46,7 @@ const signMessage = async (req, res, RELAY_HUB, RECIPIENT_ADDRESS, trustedPrivKe
   }
 };
 
-const createUser = (req,res, db) => {
-    
+const createUser = (req, res, db) => {
   //Require the following fields: username, email, encryptedPrivKey, pubKey.
   //Potentially ask user to sign something like the Username + Email so we know their private key
   //Matches their public key.
@@ -53,12 +58,10 @@ const createUser = (req,res, db) => {
     !obj.hasOwnProperty(obj.encryptedPrivKey) &&
     !obj.hasOwnProperty(obj.pubKey)
   ) {
-
     //Check if User Exists:
     if (db[obj.pubKey]) {
       return res.status(500).send("User already exists");
     } else {
-
       //Create the User on our MockDatabase
       db[obj.pubKey] = {
         userName: obj.userName,
@@ -67,7 +70,7 @@ const createUser = (req,res, db) => {
         nonce: 0
       };
 
-      //Return okay Status. 
+      //Return okay Status.
       return res
         .status(201)
         .send(`User ${obj.userName} with publicKey: ${obj.pubKey} created.`);
@@ -78,8 +81,15 @@ const createUser = (req,res, db) => {
       .status(500)
       .send("Incorrect JSON object: User Signup has wrong arguments");
   }
-}
+};
 
+const recoverSignerAddress = (signature, message) => {
+  const signer = EthCrypto.recover(
+    signature, // signature
+    EthCrypto.hash.keccak256(message) // message hash
+  );
+  return signer;
+};
 const _signContractCall = async (
   relay,
   from,
@@ -109,5 +119,4 @@ const _signContractCall = async (
   return signedMessage;
 };
 
-
-module.exports = { signMessage, createUser };
+module.exports = { signMessage, createUser, recoverSignerAddress };
