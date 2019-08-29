@@ -5,7 +5,18 @@ const EthCrypto = require("eth-crypto");
 const cors = require("cors");
 const app = express();
 
-//Not clearly needed.
+//This is our Mock Database
+//Each user should have this format, we index by publicKey and always require messages to be signed with a nonce  top revent reuse
+// publickey:  { user:  userName, email:  email, encryptedPrivateKey: encryptedPrivateKey, validUser: bool, nonce: nonce}
+// db = {
+//   'address1': {user},
+//   'address2': {user},
+//   ...
+// }
+
+const db = {};
+
+//Not sure if we need this.
 const generatedKeyPair = EthCrypto.createIdentity();
 
 const trustedPrivKey =
@@ -56,9 +67,9 @@ app.post("/", (req, res) => {
 //Expose the JSON Body:
 app.post("/checkSig", (req, res, next) => {
   const obj = req.body;
-  // Decided if we want to sign the transaction or not. 
+  // Decided if we want to sign the transaction or not.
   signMessage(req, res);
-})
+});
 
 const signMessage = async (req, res) => {
   const obj = req.body;
@@ -72,9 +83,28 @@ const signMessage = async (req, res) => {
     !obj.hasOwnProperty(obj.gasLimit) &&
     !obj.hasOwnProperty(obj.nonce)
   ) {
-    const {relay, from, encodedFunction, transactionFee, gasPrice, gasLimit, nonce }  = obj;
-    const signedMessage = await _signContractCall(relay, from, encodedFunction, transactionFee, gasPrice, gasLimit, nonce, RELAY_HUB, RECIPIENT_ADDRESS, trustedPrivKey)
-    return res.json({signedMessage: signedMessage});
+    const {
+      relay,
+      from,
+      encodedFunction,
+      transactionFee,
+      gasPrice,
+      gasLimit,
+      nonce
+    } = obj;
+    const signedMessage = await _signContractCall(
+      relay,
+      from,
+      encodedFunction,
+      transactionFee,
+      gasPrice,
+      gasLimit,
+      nonce,
+      RELAY_HUB,
+      RECIPIENT_ADDRESS,
+      trustedPrivKey
+    );
+    return res.json({ signedMessage: signedMessage });
   } else {
     //Send this error message if our POST object  is not properly formatted
     res.status(500).send("Incorrect JSON object");
