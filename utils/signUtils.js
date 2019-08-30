@@ -119,4 +119,20 @@ const _signContractCall = async (
   return signedMessage;
 };
 
-module.exports = { signMessage, createUser, recoverSignerAddress };
+const checkTimeStamp = (
+  userTimeStamp,
+  currentTime = Date.now(),
+  offset = 1000
+) => {
+  return (
+    currentTime - offset <= userTimeStamp &&
+    userTimeStamp <= currentTime + offset
+  );
+};
+
+module.exports = {
+  signMessage,
+  checkTimeStamp,
+  createUser,
+  recoverSignerAddress
+};
