@@ -119,20 +119,51 @@ const _signContractCall = async (
   return signedMessage;
 };
 
-const checkTimeStamp = (
-  userTimeStamp,
-  currentTime = Date.now(),
-  offset = 1000
-) => {
+const checkBlockNumber = (userBlockNumber, currentBlock, offset = 1) => {
   return (
-    currentTime - offset <= userTimeStamp &&
-    userTimeStamp <= currentTime + offset
+    currentBlock - offset <= userBlockNumber &&
+    userBlockNumber <= currentBlock + offset
   );
 };
 
+const checkBlockStamp = async (blockHash, blockNumber, web3) => {
+  const currentBlock = await web3.eth.getBlockNumber();
+  const userBlock = await web3.eth.getBlock(currentBlock);
+
+  //Require  the submitted block number to be recent.
+  //In this case, within 2 blocks
+  if (checkBlockNumber(blockNumber, currentBlock, 2)) {
+    //Here we need  to check  the hash is  correct.
+  } else {
+    return false;
+  }
+};
+
+const propCheckAuthUser = obj => {
+  if (
+    !obj.hasOwnProperty(obj.blockNumber) &&
+    !obj.hasOwnProperty(obj.signature) &&
+    !obj.hasOwnProperty(obj.pubKey)
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+const notAuthenticated = (req, next) =>  {
+  console.log("Not authenticated");
+  req.user = null;
+  req.authenticated = false;
+  next();
+}
+
 module.exports = {
   signMessage,
-  checkTimeStamp,
+  checkBlockNumber,
   createUser,
-  recoverSignerAddress
+  recoverSignerAddress,
+  checkBlockStamp,
+  propCheckAuthUser,
+  notAuthenticated
 };

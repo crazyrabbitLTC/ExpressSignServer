@@ -3,13 +3,20 @@ const port = process.env.PORT || 88;
 const express = require("express");
 const EthCrypto = require("eth-crypto");
 const cors = require("cors");
+const asyncHandler = require("express-async-handler");
 const app = express();
 const {
   signMessage,
   createUser,
   recoverSignerAddress,
-  checkTimeStamp
+  checkBlockNumber,
+  propCheckAuthUser,
+  notAuthenticated
 } = require("./utils/signUtils.js");
+
+//Connect to Web3
+const Web3Eth = require("web3-eth");
+const eth = new Web3Eth("ws://localhost:8545");
 
 //This is our Mock Database
 //Each user should have this format, we index by publicKey and always require messages to be signed with a nonce  top revent reuse
@@ -66,56 +73,35 @@ app.use(express.json());
 //their private key with the  most recent nonce. We recover the signer in Javascript and identify theu sers
 
 //Here we check if we know this user.
-//We
-app.use((req, res, next) => {
-  const obj = req.body;
 
-  //Make sure we have the proper fields
-  //In this case, we could someone sign something at the current time, and then allow them
-  //to  submit in the "range" of allowed times.
-  if (
-    !obj.hasOwnProperty(obj.timeStamp) &&
-    !obj.hasOwnProperty(obj.signature) &&
-    !obj.hasOwnProperty(obj.pubKey)
-  ) {
-    const { timeStamp, signature, pubKey } = obj;
-    console.log(
-      "TimeStamp: ",
-      timeStamp,
-      " Signature: ",
-      signature,
-      " PubKey: ",
-      pubKey
-    );
-    try {
-      if (
-        recoverSignerAddress(signature, timeStamp) === pubKey &&
-        checkTimeStamp(timeStamp)
-      ) {
-        //Now we need to be sure that our TimeStamp is  "Around now"
-        //This means our  user has signed  this "recently". 
-        //We could theoretically use a nonce, but in this case, we only want to check
-        //that we  KNOW  this user, not that  we  will pay their transactions. 
-        //This means We can reasonably assume that the user has righst to see  private
-        //Information we might have about them.
+app.use(
+  asyncHandler(async (req, res, next) => {
+    const obj = req.body;
+    
+    const currentBlock = await eth.getBlock("latest");
+
+    console.log("Current block: ", currentBlock.hash);
+    //Make sure we have the proper fields
+    if (propCheckAuthUser(obj)) {
+      const { blockNumber, signature, pubKey } = obj;
+      const userBlock = await eth.getBlock(blockNumber);
+      console.log("UserBlock: ", userBlock.hash);
+      const recoveredAddress = recoverSignerAddress(signature, userBlock.hash);
+      const validBlockNumber = checkBlockNumber(blockNumber, currentBlock);
+
+      if (validBlockNumber && recoveredAddress == pubKey) {
         req.user = db[pubKey];
         req.authenticated = true;
-      } else {
-        req.user = null;
-        req.authenticated = false;
+        console.log("Authenticated: ", req.authenticated, "User: ", req.user);
+        next();
       }
-    } catch (error) {
-      req.user = null;
-      req.authenticated = false;
-    }
-  } else {
-    req.user = null;
-    req.authenticated = false;
-  }
 
-  console.log("Authenticated: ", req.authenticated, "User: ", req.user);
-  next();
-});
+      notAuthenticated(req, next);
+    } else {
+      notAuthenticated(req, next);
+    }
+  })
+);
 
 // app.get("/", (req, res) => {
 //   return res.send("Received a GET HTTP method");
