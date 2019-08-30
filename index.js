@@ -11,7 +11,8 @@ const {
   recoverSignerAddress,
   checkBlockNumber,
   propCheckAuthUser,
-  notAuthenticated
+  notAuthenticated,
+  logOut
 } = require("./utils/signUtils.js");
 
 //Connect to Web3
@@ -21,10 +22,13 @@ const eth = new Web3Eth("ws://localhost:8545");
 //This is our Mock Database
 //Each user should have this format, we index by publicKey and always require messages to be signed with a nonce  top revent reuse
 // publickey:  { user:  userName, email:  email, encryptedPrivateKey: encryptedPrivateKey, validUser: bool, nonce: nonce}
-// db = {
-//   'address1': {user},
-//   'address2': {user},
-//   ...
+// {
+// 	"userName": "DenTest2", 
+// 	"email": "testEmail@email.com",
+// 	"encryptedPrivKey": "encryptedPrivateKeyHere",
+// 	"pubKey": "PublicKeyHere1",
+// 	"signature": "blah blach blach",
+// 	"blockNumber": "1"
 // }
 
 const db = {};
@@ -69,33 +73,38 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-//On each interaction with the server, the user will be required on the front end to sign a message with
-//their private key with the  most recent nonce. We recover the signer in Javascript and identify theu sers
 
-//Here we check if we know this user.
-
+//Do we know this user? If  yes, load the user as Authenticated.
+//Each interaction with the Server should have the following properties:
+// {
+// ...
+// 	"pubKey": "PublicKeyHere",
+// 	"signature": "Signature",
+// 	"blockNumber": "BlockNumber"
+// }
 app.use(
   asyncHandler(async (req, res, next) => {
     const obj = req.body;
-    
     const currentBlock = await eth.getBlock("latest");
 
-    console.log("Current block: ", currentBlock.hash);
     //Make sure we have the proper fields
     if (propCheckAuthUser(obj)) {
       const { blockNumber, signature, pubKey } = obj;
       const userBlock = await eth.getBlock(blockNumber);
-      console.log("UserBlock: ", userBlock.hash);
       const recoveredAddress = recoverSignerAddress(signature, userBlock.hash);
       const validBlockNumber = checkBlockNumber(blockNumber, currentBlock);
 
+      //The user supplies a signedMessage of a blockhash, and the blockNumber.
+      //We check the blocknumber, get the hash and then attempt to recover the PublicKey
+      //If the public Key matches the users supplied public key, we know  they have signed
+      //The  message  recently, and thus it should be them. 
+      //If there is any problem, we  simply don't authenticate  them. 
       if (validBlockNumber && recoveredAddress == pubKey) {
         req.user = db[pubKey];
         req.authenticated = true;
         console.log("Authenticated: ", req.authenticated, "User: ", req.user);
         next();
       }
-
       notAuthenticated(req, next);
     } else {
       notAuthenticated(req, next);
@@ -111,13 +120,20 @@ app.use(
 // });
 
 //Signup Area
+//We already know they are who they say they are because of the middleware above
+//At this point  we  can decide to  create  them  as a user or not.
 app.put("/", (req, res) => {
   const obj = req.body;
   createUser(req, res, db);
 });
 
+//Since we already know who they  are, if they wish to be  delete, we can let them. 
 app.delete("/", (req, res) => {
-  return res.send("Received a DELETE HTTP method");
+  if(req.authenticated){
+    delete db[req.user];
+    logOut(req);
+  }
+  return res.send(`User ${reg.user} deleted`);
 });
 
 app.get("/test", function(req, res, next) {

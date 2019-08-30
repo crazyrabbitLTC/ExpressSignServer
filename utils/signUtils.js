@@ -158,6 +158,11 @@ const notAuthenticated = (req, next) =>  {
   next();
 }
 
+const logOut =  (req) => {
+  req.user = null;
+  req.authenticated = false;
+}
+
 module.exports = {
   signMessage,
   checkBlockNumber,
@@ -165,5 +170,6 @@ module.exports = {
   recoverSignerAddress,
   checkBlockStamp,
   propCheckAuthUser,
-  notAuthenticated
+  notAuthenticated,
+  logOut
 };
