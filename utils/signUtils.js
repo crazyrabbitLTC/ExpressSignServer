@@ -83,6 +83,17 @@ const createUser = (req, res, db) => {
   }
 };
 
+const getUser = (req, res, db) => {
+  const obj = req.body;
+  console.log(`The request  object: `);
+  console.dir(obj);
+  if (db[obj.pubKey]) {
+    return { exists: true };
+  } else {
+    return { exists: false };
+  }
+};
+
 const recoverSignerAddress = (signature, message) => {
   const signer = EthCrypto.recover(
     signature, // signature
@@ -150,17 +161,17 @@ const propCheckAuthUser = obj => {
   }
 };
 
-const notAuthenticated = (req, next) =>  {
+const notAuthenticated = (req, next) => {
   //console.log("Not authenticated");
   req.user = null;
   req.authenticated = false;
   next();
-}
+};
 
-const logOut =  (req) => {
+const logOut = req => {
   req.user = null;
   req.authenticated = false;
-}
+};
 
 module.exports = {
   signMessage,
@@ -170,5 +181,6 @@ module.exports = {
   checkBlockStamp,
   propCheckAuthUser,
   notAuthenticated,
-  logOut
+  logOut,
+  getUser
 };

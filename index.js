@@ -12,7 +12,8 @@ const {
   checkBlockNumber,
   propCheckAuthUser,
   notAuthenticated,
-  logOut
+  logOut,
+  getUser
 } = require("./utils/signUtils.js");
 
 //Connect to Web3
@@ -117,9 +118,6 @@ app.get("/", (req, res) => {
   return res.status(200).send("Received a GET HTTP method");
 });
 
-// app.post("/", (req, res) => {
-//   return res.send("Received a POST HTTP method");
-// });
 
 //Signup Area
 //We already know they are who they say they are because of the middleware above
@@ -127,6 +125,16 @@ app.get("/", (req, res) => {
 app.post("/signup", (req, res) => {
   createUser(req, res, db);
 });
+
+app.get("/user",  (req, res) => {
+  const result = getUser(req, res, db);
+  console.log("The result is: ", result);
+  if(result.exists){
+    return res.status(200).json({success: true});
+  } else  {
+    return res.status(200).json({success: false});
+  }
+})
 
 //Since we already know who they  are, if they wish to be  delete, we can let them. 
 app.delete("/", (req, res) => {
@@ -151,10 +159,6 @@ app.post("/checkSig", (req, res, next) => {
   // Decided if we want to sign the transaction or not.
   signMessage(req, res, RELAY_HUB, RECIPIENT_ADDRESS, trustedPrivKey);
 });
-
-// app.listen(port, function() {
-//   console.log("CORS-enabled web server listening on port 80");
-// });
 
 
 var server = app.listen(3000, function () {
