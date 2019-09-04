@@ -1,6 +1,16 @@
-var request = require("supertest");
-describe("loading express", function() {
-  var server;
+const request = require("supertest");
+const EthCrypto = require("eth-crypto");
+
+describe("loading express", async () => {
+  let server;
+  const generatedKeyPair = EthCrypto.createIdentity();
+  const privKey = generatedKeyPair.privateKey;
+  const pubKey = EthCrypto.publicKeyByPrivateKey(privKey);
+  const pubAddress = EthCrypto.publicKey.toAddress(pubKey);
+  const userName  = "Dennison Bertram";
+  const email  = "dennison@example.com";
+
+
   beforeEach(() => {
     delete require.cache[require.resolve("../index.js")];
     server = require("../index.js");
@@ -17,5 +27,17 @@ describe("loading express", function() {
     request(server)
       .get("/foo/bar")
       .expect(404, done);
+  });
+  it("Creates a new user: ", done => {
+    console.log(`User  Pub  Key: ${pubAddress}` );
+    request(server)
+      .post("/signup")
+      .send({
+        userName,
+        email,
+        encryptedPrivKey: privKey,
+        pubKey: pubAddress
+      })
+      .expect(201, done);
   });
 });

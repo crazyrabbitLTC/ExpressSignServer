@@ -113,7 +113,6 @@ const _signContractCall = async (
     { type: "address", value: RELAY_HUB },
     { type: "address", value: RELAY_RECIPIENT }
   ]);
-  console.log("The message once hashed is: ", message);
   const signedMessage = await EthCrypto.sign(privateKey, message);
 
   return signedMessage;
@@ -152,7 +151,7 @@ const propCheckAuthUser = obj => {
 };
 
 const notAuthenticated = (req, next) =>  {
-  console.log("Not authenticated");
+  //console.log("Not authenticated");
   req.user = null;
   req.authenticated = false;
   next();

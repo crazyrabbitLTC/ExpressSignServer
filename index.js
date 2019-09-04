@@ -39,7 +39,7 @@ const generatedKeyPair = EthCrypto.createIdentity();
 const trustedPrivKey =
   process.env.TRUSTED_SIGNER_PRIVKEY || generatedKeyPair.privateKey;
 const trustedPubKey = EthCrypto.publicKeyByPrivateKey(trustedPrivKey);
-console.log("Trusted Pub Key: ", EthCrypto.publicKey.toAddress(trustedPubKey));
+//console.log("Trusted Pub Key: ", EthCrypto.publicKey.toAddress(trustedPubKey));
 
 const RELAY_HUB =
   process.env.RELAY_HUB || "0xd216153c06e857cd7f72665e0af1d7d82172f494";
@@ -124,9 +124,8 @@ app.get("/", (req, res) => {
 //Signup Area
 //We already know they are who they say they are because of the middleware above
 //At this point  we  can decide to  create  them  as a user or not.
-app.put("/", (req, res) => {
+app.post("/signup", (req, res) => {
   createUser(req, res, db);
-  return res.status(200).send("User Created");
 });
 
 //Since we already know who they  are, if they wish to be  delete, we can let them. 
@@ -142,9 +141,7 @@ app.get("/test", function(req, res, next) {
   res.json({ msg: "This is CORS-enabled for all origins!" });
 });
 
-app.post("//test", (req, res) => {
-  //console.log(req.body);
-  //console.log("Type of: ", typeof req.body);
+app.post("/test", (req, res) => {
   return res.json(req.body);
 });
 
