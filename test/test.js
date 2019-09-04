@@ -7,8 +7,13 @@ describe("loading express", async () => {
   const privKey = generatedKeyPair.privateKey;
   const pubKey = EthCrypto.publicKeyByPrivateKey(privKey);
   const pubAddress = EthCrypto.publicKey.toAddress(pubKey);
-  const userName = "Dennison Bertram";
-  const email = "dennison@example.com";
+  let relay = "0xD216153c06E857cD7f72665E0aF1d7D82172F494";
+  let from = "0xD216153c06E857cD7f72665E0aF1d7D82172F494";
+  let encodedFunction = "0xe0b6fcfc";
+  let transactionFee = 1;
+  let gasPrice = 1;
+  let gasLimit = 1;
+  let nonce = 1;
 
   beforeEach(() => {
     delete require.cache[require.resolve("../index.js")];
@@ -17,41 +22,18 @@ describe("loading express", async () => {
   afterEach(done => {
     server.close(done);
   });
-  it("responds to /", done => {
+  it("Signs a message", done => {
     request(server)
-      .get("/")
-      .expect(200, done);
-  });
-  it("404 everything else", done => {
-    request(server)
-      .get("/foo/bar")
-      .expect(404, done);
-  });
-  it("Creates a new user: ", done => {
-    console.log(`User  Pub  Key: ${pubAddress}`);
-    request(server)
-      .post("/signup")
+      .post("/checkSig")
       .send({
-        userName,
-        email,
-        encryptedPrivKey: privKey,
-        pubKey: pubAddress
+        relay,
+        from,
+        encodedFunction,
+        transactionFee,
+        gasPrice,
+        gasLimit,
+        nonce
       })
-      .expect(201, done);
-  });
-  it("Creates and Finds created user", done => {
-    request(server)
-      .post("/signup")
-      .send({
-        userName,
-        email,
-        encryptedPrivKey: privKey,
-        pubKey: pubAddress
-      });
-
-    request(server)
-      .get("/user")
-      .send({ pubKey: pubAddress })
       .expect(200, done);
   });
 });
