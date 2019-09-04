@@ -75,46 +75,49 @@ app.use(express.json());
 
 
 //Do we know this user? If  yes, load the user as Authenticated.
-//Each interaction with the Server should have the following properties:
+//Each interaction with the Server should have the minimum following properties:
 // {
 // ...
 // 	"pubKey": "PublicKeyHere",
 // 	"signature": "Signature",
 // 	"blockNumber": "BlockNumber"
 // }
-app.use(
-  asyncHandler(async (req, res, next) => {
-    const obj = req.body;
-    const currentBlock = await eth.getBlock("latest");
 
-    //Make sure we have the proper fields
-    if (propCheckAuthUser(obj)) {
-      const { blockNumber, signature, pubKey } = obj;
-      const userBlock = await eth.getBlock(blockNumber);
-      const recoveredAddress = recoverSignerAddress(signature, userBlock.hash);
-      const validBlockNumber = checkBlockNumber(blockNumber, currentBlock);
 
-      //The user supplies a signedMessage of a blockhash, and the blockNumber.
-      //We check the blocknumber, get the hash and then attempt to recover the PublicKey
-      //If the public Key matches the users supplied public key, we know  they have signed
-      //The  message  recently, and thus it should be them. 
-      //If there is any problem, we  simply don't authenticate  them. 
-      if (validBlockNumber && recoveredAddress == pubKey) {
-        req.user = db[pubKey];
-        req.authenticated = true;
-        console.log("Authenticated: ", req.authenticated, "User: ", req.user);
-        next();
-      }
-      notAuthenticated(req, next);
-    } else {
-      notAuthenticated(req, next);
-    }
-  })
-);
+// app.use(
+//   asyncHandler(async (req, res, next) => {
+//     const obj = req.body;
+//     const currentBlock = await eth.getBlock("latest");
 
-// app.get("/", (req, res) => {
-//   return res.send("Received a GET HTTP method");
-// });
+//     //Make sure we have the proper fields
+//     if (propCheckAuthUser(obj)) {
+//       const { blockNumber, signature, pubKey } = obj;
+//       const userBlock = await eth.getBlock(blockNumber);
+//       const recoveredAddress = recoverSignerAddress(signature, userBlock.hash);
+//       const validBlockNumber = checkBlockNumber(blockNumber, currentBlock);
+
+//       //The user supplies a signedMessage of a blockhash, and the blockNumber.
+//       //We check the blocknumber, get the hash and then attempt to recover the PublicKey
+//       //If the public Key matches the users supplied public key, we know  they have signed
+//       //The  message  recently, and thus it should be them. 
+//       //If there is any problem, we  simply don't authenticate  them. 
+//       if (validBlockNumber && recoveredAddress == pubKey) {
+//         req.user = db[pubKey];
+//         req.authenticated = true;
+//         console.log("Authenticated: ", req.authenticated, "User: ", req.user);
+//         next();
+//       }
+//       notAuthenticated(req, next);
+//     } else {
+//       notAuthenticated(req, next);
+//     }
+//   })
+// );
+
+
+app.get("/", (req, res) => {
+  return res.status(200).send("Received a GET HTTP method");
+});
 // app.post("/", (req, res) => {
 //   return res.send("Received a POST HTTP method");
 // });
@@ -153,6 +156,13 @@ app.post("/checkSig", (req, res, next) => {
   signMessage(req, res, RELAY_HUB, RECIPIENT_ADDRESS, trustedPrivKey);
 });
 
-app.listen(port, function() {
-  console.log("CORS-enabled web server listening on port 80");
+// app.listen(port, function() {
+//   console.log("CORS-enabled web server listening on port 80");
+// });
+
+
+var server = app.listen(3000, function () {
+  var port = server.address().port;
+  console.log('Example app listening at port %s', port);
 });
+module.exports = server;
