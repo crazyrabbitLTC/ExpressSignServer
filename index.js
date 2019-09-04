@@ -73,15 +73,14 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 
-//Do we know this user? If  yes, load the user as Authenticated.
-//Each interaction with the Server should have the minimum following properties:
-// {
-// ...
-// 	"pubKey": "PublicKeyHere",
-// 	"signature": "Signature",
-// 	"blockNumber": "BlockNumber"
-// }
-
+// //Do we know this user? If  yes, load the user as Authenticated.
+// //Each interaction with the Server should have the minimum following properties:
+// // {
+// // ...
+// // 	"pubKey": "PublicKeyHere",
+// // 	"signature": "Signature",
+// // 	"blockNumber": "BlockNumber"
+// // }
 
 // app.use(
 //   asyncHandler(async (req, res, next) => {
@@ -117,6 +116,7 @@ app.use(express.json());
 app.get("/", (req, res) => {
   return res.status(200).send("Received a GET HTTP method");
 });
+
 // app.post("/", (req, res) => {
 //   return res.send("Received a POST HTTP method");
 // });
@@ -125,8 +125,8 @@ app.get("/", (req, res) => {
 //We already know they are who they say they are because of the middleware above
 //At this point  we  can decide to  create  them  as a user or not.
 app.put("/", (req, res) => {
-  const obj = req.body;
   createUser(req, res, db);
+  return res.status(200).send("User Created");
 });
 
 //Since we already know who they  are, if they wish to be  delete, we can let them. 

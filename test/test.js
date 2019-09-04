@@ -1,21 +1,21 @@
-var request = require('supertest');
-describe('loading express', function () {
+var request = require("supertest");
+describe("loading express", function() {
   var server;
-  beforeEach(function () {
-    delete require.cache[require.resolve('../index.js')];
-    server = require('../index.js');
+  beforeEach(() => {
+    delete require.cache[require.resolve("../index.js")];
+    server = require("../index.js");
   });
-  afterEach(function (done) {
+  afterEach(done => {
     server.close(done);
   });
-  it('responds to /', function testSlash(done) {
-  request(server)
-    .get('/')
-    .expect(200, done);
-  });
-  it('404 everything else', function testPath(done) {
+  it("responds to /", done => {
     request(server)
-      .get('/foo/bar')
+      .get("/")
+      .expect(200, done);
+  });
+  it("404 everything else", done => {
+    request(server)
+      .get("/foo/bar")
       .expect(404, done);
   });
 });
