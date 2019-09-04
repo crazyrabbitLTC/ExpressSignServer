@@ -59,7 +59,6 @@ if (!RECIPIENT_ADDRESS) {
 const whitelist = ["http://localhost"];
 const corsOptions = {
   origin: function(origin, callback) {
-    console.log("Origin is:  ", origin);
     if (whitelist.indexOf(origin) !== -1 || !origin) {
       callback(null, true);
     } else {
