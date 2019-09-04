@@ -34,6 +34,14 @@ describe("loading express", async () => {
         gasLimit,
         nonce
       })
-      .expect(200, done);
+      .expect("Content-Type", "application/json; charset=utf-8")
+      .expect(
+        200,
+        {
+          signedMessage:
+            "0x7e8aed9f6e82c5081d6bd4c97bd0dd546eab6543919d1903c3da8b0261508e3f642a8bfe4fa91ad8bc1476494d1c253d78cae2b037b8f068e200b1e0d89ee41a1b"
+        },
+        done
+      );
   });
 });

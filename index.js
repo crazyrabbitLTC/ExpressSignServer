@@ -13,12 +13,9 @@ const eth = new Web3Eth("ws://localhost:8545");
 
 //Not sure if we need this.
 const generatedKeyPair = EthCrypto.createIdentity();
-
 const trustedPrivKey =
   process.env.TRUSTED_SIGNER_PRIVKEY || generatedKeyPair.privateKey;
 const trustedPubKey = EthCrypto.publicKeyByPrivateKey(trustedPrivKey);
-//console.log("Trusted Pub Key: ", EthCrypto.publicKey.toAddress(trustedPubKey));
-
 const RELAY_HUB =
   process.env.RELAY_HUB || "0xd216153c06e857cd7f72665e0af1d7d82172f494";
 
@@ -56,7 +53,7 @@ app.post(
   asyncHandler(async (req, res, next) => {
     const obj = req.body;
     let result;
-    // Decided if we want to sign the transaction or not.
+    // Decide if we want to sign the transaction or not.
     try {
       result = await signMessage(
         req,
@@ -70,11 +67,8 @@ app.post(
     }
 
     if (result) {
-      console.log(`Sending:`);
-      console.dir(result);
-      return res.status(200).json({ signedMessage: result });
+      return res.status(200).json(result);
     } else {
-      console.log(`Sending and error`);
       return res.status(404).send();
     }
   })
