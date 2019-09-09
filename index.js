@@ -31,7 +31,7 @@ if (!RECIPIENT_ADDRESS) {
   process.exit(22);
 }
 
-const whitelist = ["http://localhost"];
+const whitelist = ["http://localhost", "localhost:3001"];
 const corsOptions = {
   origin: function(origin, callback) {
     if (whitelist.indexOf(origin) !== -1 || !origin) {
@@ -44,24 +44,22 @@ const corsOptions = {
 
 //SERVER CODE STARTS HERE:
 
-app.use(cors(corsOptions));
+//app.use(cors(corsOptions));
 app.use(express.json());
 
 //Expose the JSON Body:
 app.post(
   "/checkSig",
   asyncHandler(async (req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "localhost:3001");
     const obj = req.body;
     let result;
-    // Decide if we want to sign the transaction or not.
+
+    console.log(`Request for Signature:`);
+    console.dir(obj);
+
     try {
-      result = await signMessage(
-        req,
-        res,
-        RELAY_HUB,
-        RECIPIENT_ADDRESS,
-        trustedPrivKey
-      );
+      result = await signMessage(obj, trustedPrivKey);
     } catch (error) {
       console.log(error);
     }
@@ -77,5 +75,10 @@ app.post(
 var server = app.listen(3000, function() {
   var port = server.address().port;
   console.log("Example app listening at port %s", port);
+  console.log(
+    "TrustedPubKey is: ",
+    EthCrypto.publicKey.toAddress(trustedPubKey)
+  );
+  console.log("TrustedPrivKey is: ", trustedPrivKey);
 });
 module.exports = server;

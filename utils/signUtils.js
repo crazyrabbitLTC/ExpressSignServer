@@ -1,49 +1,30 @@
 const EthCrypto = require("eth-crypto");
 
-const signMessage = async (
-  req,
-  res,
-  RELAY_HUB,
-  RECIPIENT_ADDRESS,
-  trustedPrivKey
-) => {
-  const obj = req.body;
-  //Require that all our properties are present or else send an error
-  if (
-    !obj.hasOwnProperty(obj.relay) &&
-    !obj.hasOwnProperty(obj.from) &&
-    !obj.hasOwnProperty(obj.encodedFunction) &&
-    !obj.hasOwnProperty(obj.transactionFee) &&
-    !obj.hasOwnProperty(obj.gasPrice) &&
-    !obj.hasOwnProperty(obj.gasLimit) &&
-    !obj.hasOwnProperty(obj.nonce)
-  ) {
+const signMessage = async (obj, trustedPrivKey) => {
     const {
-      relay,
       from,
-      encodedFunction,
-      transactionFee,
+      to,
+      encodedFunctionCall,
+      txFee,
       gasPrice,
-      gasLimit,
-      nonce
+      gas,
+      nonce,
+      relayerAddress,
+      relayHubAddress
     } = obj;
     const signedMessage = await _signContractCall(
-      relay,
       from,
-      encodedFunction,
-      transactionFee,
+      to,
+      encodedFunctionCall,
+      txFee,
       gasPrice,
-      gasLimit,
+      gas,
       nonce,
-      RELAY_HUB,
-      RECIPIENT_ADDRESS,
+      relayerAddress,
+      relayHubAddress,
       trustedPrivKey
     );
-    return ({ signedMessage: signedMessage });
-  } else {
-    //Send this error message if our POST object  is not properly formatted
-    return null;
-  }
+    return { signedMessage: signedMessage };
 };
 
 const recoverSignerAddress = (signature, message) => {
@@ -53,28 +34,29 @@ const recoverSignerAddress = (signature, message) => {
   );
   return signer;
 };
+
 const _signContractCall = async (
-  relay,
   from,
-  encodedFunction,
-  transactionFee,
+  to,
+  encodedFunctionCall,
+  txFee,
   gasPrice,
-  gasLimit,
+  gas,
   nonce,
-  RELAY_HUB,
-  RELAY_RECIPIENT,
+  relayerAddress,
+  relayHubAddress,
   privateKey
 ) => {
   const message = EthCrypto.hash.keccak256([
-    { type: "address", value: relay },
     { type: "address", value: from },
-    { type: "bytes", value: encodedFunction },
-    { type: "uint256", value: transactionFee },
+    { type: "address", value: to },
+    { type: "bytes", value: encodedFunctionCall },
+    { type: "uint256", value: txFee },
     { type: "uint256", value: gasPrice },
-    { type: "uint256", value: gasLimit },
+    { type: "uint256", value: gas },
     { type: "uint256", value: nonce },
-    { type: "address", value: RELAY_HUB },
-    { type: "address", value: RELAY_RECIPIENT }
+    { type: "address", value: relayHubAddress },
+    { type: "address", value: relayerAddress }
   ]);
   const signedMessage = await EthCrypto.sign(privateKey, message);
 
