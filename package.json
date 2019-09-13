@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/crazyrabbitLTC/ExpressSignServer#readme",
   "dependencies": {
+    "@openzeppelin/gsn-provider": "^0.1.6",
     "cors": "^2.8.5",
     "dotenv": "^8.1.0",
     "esm": "^3.2.25",
@@ -24,7 +25,9 @@
     "express": "^4.17.1",
     "express-async-handler": "^1.1.4",
     "mocha": "^6.2.0",
-    "nodemon": "^1.19.1",
+    "nodemon": "^1.19.2",
+    "openzeppelin-test-helpers": "^0.4.3",
+    "web3": "^1.2.1",
     "web3-eth": "^1.2.1"
   },
   "devDependencies": {
