@@ -1,9 +1,6 @@
-const { utils } = require("@openzeppelin/gsn-provider");
-
-const EthCrypto = require("eth-crypto");
 const Web3 = require("web3");
 const {
-  utils: { toBN, soliditySha3, toChecksumAddress }
+  utils: { toBN, soliditySha3 }
 } = require("web3");
 const web3 = new Web3("ws://localhost:8545");
 
