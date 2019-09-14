@@ -7,9 +7,7 @@ const {
 } = require("web3");
 const web3 = new Web3("ws://localhost:8545");
 
-// const signer = web3.eth.accounts.create();
-// console.log(web3.eth.accounts.wallet)
-// console.log("The signer is: ", signer);
+
 function fixSignature(signature) {
   // in geth its always 27/28, in ganache its 0/1. Change to 27/28 to prevent
   // signature malleability if version is 0/1
@@ -48,29 +46,3 @@ module.exports = {
   signMessage
 };
 
-// const signMessage = async (
-//   from,
-//   to,
-//   encodedFunctionCall,
-//   txFee,
-//   gasPrice,
-//   gas,
-//   nonce,
-//   relayerAddress,
-//   relayHubAddress,
-//   signer
-// ) => {
-//   const hash = EthCrypto.hash.keccak256([
-//     { type: "address", value: from },
-//     { type: "address", value: to },
-//     { type: "bytes", value: encodedFunctionCall },
-//     { type: "uint256", value: txFee },
-//     { type: "uint256", value: gasPrice },
-//     { type: "uint256", value: gas },
-//     { type: "uint256", value: nonce },
-//     { type: "address", value: relayHubAddress },
-//     { type: "address", value: relayerAddress }
-//   ]);
-//   const signature = await EthCrypto.sign(signer, hash);
-//   return signature; // this takes care of removing signature malleability attacks
-// };
