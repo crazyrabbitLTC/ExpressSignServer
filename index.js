@@ -1,7 +1,6 @@
 require("dotenv").config();
 const port = process.env.PORT || 3000;
 const express = require("express");
-const EthCrypto = require("eth-crypto");
 const asyncHandler = require("express-async-handler");
 const app = express();
 const { signMessage } = require("./utils/signUtils.js");
@@ -13,7 +12,7 @@ app.post(
     res.setHeader("Access-Control-Allow-Origin", "localhost:3001");
 
     const obj = req.body;
-    console.log(obj);
+    console.log("Received Object  is: ",obj);
     let result;
     try {
       result = await signMessage(obj);
