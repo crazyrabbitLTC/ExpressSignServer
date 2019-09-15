@@ -11,17 +11,10 @@ const getDatabase = async () => {
   const networkId = await web3.eth.net.getId();
   const deployedNetwork = userDbArtifact.networks[networkId.toString()];
   userDb = new web3.eth.Contract(userDbArtifact.abi, deployedNetwork.address);
-
-  // console.log("Network ID", networkId);
-  // console.log("Deployed Network address", deployedNetwork.address);
-  // console.log("Accounts", accounts);
-
   return userDb;
 };
 
 const addUser = async userAddress => {
-  const accounts = await web3.eth.getAccounts();
-  let tx;
   try {
     await userDb.methods.addUser(userAddress).send({ from: accounts[0] });
     return true;
@@ -30,8 +23,29 @@ const addUser = async userAddress => {
   }
 };
 
-const checkUser = async () => {};
+const checkUser = async userAddress => {
+  let res;
+  try {
+    res = await userDb.methods.users(userAddress).call();
+  } catch (error) {
+    return false;
+  }
+  if (res) {
+    return true;
+  } else {
+    return false;
+  }
+};
 
-const deleteUser = async () => {};
+const deleteUser = async userAddress => {
+  try {
+    tx = await userDb.methods
+      .deleteUser(userAddress)
+      .send({ from: accounts[0] });
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
 
 module.exports = { getDatabase, addUser, checkUser, deleteUser };
