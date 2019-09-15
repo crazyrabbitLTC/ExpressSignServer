@@ -18,6 +18,8 @@
   "homepage": "https://github.com/crazyrabbitLTC/ExpressSignServer#readme",
   "dependencies": {
     "@openzeppelin/gsn-provider": "^0.1.6",
+    "assert": "^2.0.0",
+    "chai": "^4.2.0",
     "cors": "^2.8.5",
     "dotenv": "^8.1.0",
     "esm": "^3.2.25",

@@ -1,10 +1,21 @@
 const request = require("supertest");
 const Web3 = require("web3");
+const chai = require("chai");
 const {
   utils: { toBN, soliditySha3 }
 } = require("web3");
 const web3 = new Web3("ws://localhost:8545");
 const { signMessage } = require("../utils/signUtils.js");
+const expect = chai.expect;
+const assert = require("assert");
+
+const mochaAsync = fn => {
+  return done => {
+    fn.call().then(done, err => {
+      done(err);
+    });
+  };
+};
 
 describe("loading express", async () => {
   let server;
@@ -28,28 +39,14 @@ describe("loading express", async () => {
     server.close(done);
   });
 
-  it("Signs a message", async done => {
-    accounts = await web3.eth.getAccounts();
-    from = accounts[1];
+  it(
+    "Signs a message",
+    mochaAsync(async () => {
+      accounts = await web3.eth.getAccounts();
+      from = accounts[1];
 
-    //SIGN MESSAGE LOCALLY TO COMPARE SIGNATURES
-    let testSig = await signMessage({
-      relayerAddress,
-      from,
-      encodedFunctionCall,
-      txFee,
-      gasPrice,
-      gas,
-      nonce,
-      relayHubAddress,
-      to
-    });
-    //testSig = `\"${testSig}\"`
-    console.log("Test sig: ", testSig);
-    console.log("Typeof: ", typeof testSig);
-    request(server)
-      .post("/checkSig")
-      .send({
+      //SIGN MESSAGE LOCALLY TO COMPARE SIGNATURES
+      let testSig = await signMessage({
         relayerAddress,
         from,
         encodedFunctionCall,
@@ -59,7 +56,23 @@ describe("loading express", async () => {
         nonce,
         relayHubAddress,
         to
-      })
-      .expect(200, testSig, done);
-  });
+      });
+
+      let res = await request(server)
+        .post("/checkSig")
+        .send({
+          relayerAddress,
+          from,
+          encodedFunctionCall,
+          txFee,
+          gasPrice,
+          gas,
+          nonce,
+          relayHubAddress,
+          to
+        });
+      expect(res.status).to.equal(200);
+      expect(res.body).to.equal(testSig);
+    })
+  );
 });

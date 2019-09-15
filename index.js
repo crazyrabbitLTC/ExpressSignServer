@@ -12,7 +12,7 @@ app.post(
     res.setHeader("Access-Control-Allow-Origin", "localhost:3001");
 
     const obj = req.body;
-    console.log("Received Object  is: ",obj);
+    //console.log("Received Object is: ",obj);
     let result;
     try {
       result = await signMessage(obj);
