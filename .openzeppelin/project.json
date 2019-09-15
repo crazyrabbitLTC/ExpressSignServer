@@ -1,7 +1,16 @@
 {
   "manifestVersion": "2.2",
-  "contracts": {},
+  "contracts": {
+    "UserDB": "UserDB"
+  },
   "dependencies": {},
   "name": "expresssignserver",
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "compiler": {
+    "manager": "openzeppelin",
+    "solcVersion": "0.5.11",
+    "compilerSettings": {
+      "optimizer": {}
+    }
+  }
 }

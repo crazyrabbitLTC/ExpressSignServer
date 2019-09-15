@@ -1,0 +1,58 @@
+{
+  "contracts": {
+    "UserDB": {
+      "address": "0x29670077cbF2033b62Cbcb23F39dC64732406d2d",
+      "constructorCode": "60806040523480156100115760006000fd5b50610017565b61024b806100266000396000f3fe",
+      "bodyBytecodeHash": "ae3d066ceff70f7efd370e7aace5ebad029ed6e7576b0774927490dcfc99cc6f",
+      "localBytecodeHash": "e4c219e14a1de278a11a2d97991fd88d80efe3683ad0e76682b865c657a5b301",
+      "deployedBytecodeHash": "e4c219e14a1de278a11a2d97991fd88d80efe3683ad0e76682b865c657a5b301",
+      "types": {
+        "t_bool": {
+          "id": "t_bool",
+          "kind": "elementary",
+          "label": "bool"
+        },
+        "t_mapping<t_bool>": {
+          "id": "t_mapping<t_bool>",
+          "valueType": "t_bool",
+          "label": "mapping(key => bool)",
+          "kind": "mapping"
+        }
+      },
+      "storage": [
+        {
+          "contract": "UserDB",
+          "path": "contracts/UserDB.sol",
+          "label": "users",
+          "astId": 5,
+          "type": "t_mapping<t_bool>",
+          "src": "48:37:0"
+        }
+      ],
+      "warnings": {
+        "hasConstructor": false,
+        "hasSelfDestruct": false,
+        "hasDelegateCall": false,
+        "hasInitialValuesInDeclarations": false,
+        "uninitializedBaseContracts": []
+      }
+    }
+  },
+  "solidityLibs": {},
+  "proxies": {
+    "expresssignserver/UserDB": [
+      {
+        "address": "0xb5796f95c999879CeC9d63c8998d602bBBc1ec26",
+        "version": "1.0.0",
+        "implementation": "0x29670077cbF2033b62Cbcb23F39dC64732406d2d",
+        "admin": "0xa6000705Dc670069D67dCe4A4050fCDD607ad4Cf",
+        "kind": "Upgradeable"
+      }
+    ]
+  },
+  "manifestVersion": "2.2",
+  "version": "1.0.0",
+  "proxyAdmin": {
+    "address": "0xa6000705Dc670069D67dCe4A4050fCDD607ad4Cf"
+  }
+}
